@@ -1,12 +1,16 @@
-home-assistant:
-  image: pithings/rpi-homeassistant
-  container_name: "home-assistant"
-  devices:
-    - /dev/ttyACM0:/dev/zwave
+mosquitto:
+  image: sbiermann/rpi-mosquitto
+  container_name: "mosquitto"
   volumes:
-    - /var/local/homeassistant/config:/config
-    - /etc/localtime:/etc/localtime:ro
-  net: "host"
+    - /srv/mqtt/config:/mqtt/config:ro
+    - /srv/mqtt/log:/mqtt/log
+    - /srv/mqtt/data/:/mqtt/data
+  ports:
+    - "1883:1883"
+    - "9001:9001"
+  expose:
+    - "1883"
+    - "9001"
 
 influxdb:
   image: pithings/rpi-influxdb
@@ -20,6 +24,7 @@ influxdb:
   expose:
     - "8083"
     - "8086"
+  log_driver: "journald"
 
 grafana:
   image: pithings/rpi-grafana
@@ -29,3 +34,16 @@ grafana:
     - /var/log/grafana:/var/log/grafana
   ports:
     - "3000:3000"
+  log_driver: "journald"
+
+home-assistant:
+  image: pithings/rpi-homeassistant
+  container_name: "home-assistant"
+  devices:
+    - /dev/ttyACM0:/dev/zwave
+  volumes:
+    - /var/local/homeassistant/config:/config
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/apache2/ssl:/etc/apache2/ssl
+  net: "host"
+  log_driver: "journald"
